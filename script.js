@@ -90,11 +90,6 @@ const ticTacToe = (function(){
     const playerA = createPlayer("A", "x");
     const playerB = createPlayer("B", "o");
 
-    function toggleMark(){
-        playerA.toggleMark();
-        playerB.toggleMark();
-    }
-
     const playRound = (function(playerA, playerB, board){
         const xPlayer = () => playerA.getMark() === 'x'? playerA : playerB; 
         const oPlayer = () => playerA.getMark() === 'o'? playerA : playerB;
@@ -133,21 +128,19 @@ const ticTacToe = (function(){
             playerWin = false;
         }
 
-        return {applyMark, newRound};
-
+        return {applyMark, newRound, checkRoundEnd};
     })(playerA, playerB, gameBoard);
 
-    const getGameBoard = gameBoard.getBoard;
+    function toggleMark(){
+        const freshStart = gameBoard.getBoard().every(row => {
+            return row.every(slot => slot.mark === null)
+        });
 
-    const firstPlayerName = playerA.getName;
-    const setFirstPlayerName = playerA.setName;
-    const firstPlayerScore = playerA.getScore;
-    const firstPlayerMark = playerA.getMark;
-
-    const secondPlayerName = playerB.getName;
-    const setSecondPlayerName = playerB.setName;
-    const secondPlayerScore = playerB.getScore;
-    const secondPlayerMark = playerB.getMark;
+        if(freshStart || playRound.checkRoundEnd()){
+            playerA.toggleMark();
+            playerB.toggleMark();
+        }
+    }
 
     return{
         play: playRound.applyMark,
@@ -160,9 +153,9 @@ const ticTacToe = (function(){
         getPlayerAScore: playerA.getScore,
         getPlayerAMark: playerA.getMark,
 
-        getPlayerBName: playerA.getName,
-        setPlayerBName: playerA.setName,
-        getPlayerBScore: playerA.getScore,
-        getPlayerBMark: playerA.getMark,
+        getPlayerBName: playerB.getName,
+        setPlayerBName: playerB.setName,
+        getPlayerBScore: playerB.getScore,
+        getPlayerBMark: playerB.getMark,
     }
 })()
