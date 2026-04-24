@@ -98,8 +98,8 @@ const ticTacToe = (function(){
         return {getName, setName, toggleMark, getMark, addPoint, getScore};
     }
 
-    const playerA = createPlayer("A", "x");
-    const playerB = createPlayer("B", "o");
+    const playerA = createPlayer("player 1", "x");
+    const playerB = createPlayer("player 2", "o");
 
     const playRound = (function(playerA, playerB, board){
         const xPlayer = () => playerA.getMark() === 'x'? playerA : playerB; 
@@ -134,9 +134,9 @@ const ticTacToe = (function(){
         function winningPattern(){
             if(!playerWin) return false;
             if(roundCount % 2 === 1){
-                return gameBoard.findWinningPattern('x');
+                return board.findWinningPattern('x');
             } else {
-                return gameBoard.findWinningPattern('o');
+                return board.findWinningPattern('o');
             }
         }
 
@@ -166,6 +166,9 @@ const ticTacToe = (function(){
         if(freshStart || playRound.checkRoundEnd()){
             playerA.toggleMark();
             playerB.toggleMark();
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -195,6 +198,13 @@ const ticTacToe = (function(){
     const matchLine = document.querySelector('.line-container');
     const errorText = document.querySelector('.error-text');
     const resultText = document.querySelector('.result-text');
+    const playerAName = document.querySelector('.a-name > input');
+    const playerBName = document.querySelector('.b-name > input');
+    const playerAMark = document.querySelector('.a-mark > button');
+    const playerBMark = document.querySelector('.b-mark > button'); 
+    const playerAScore = document.querySelector('.a-score > output');
+    const playerBScore = document.querySelector('.b-score > output');
+    const newRoundBtn = document.querySelector('.new-round-btn');
 
     const xMark = `<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
     <style>
@@ -241,13 +251,24 @@ const ticTacToe = (function(){
     <path class="draw-o" d="M50,22 C30,22 18,40 18,55 C18,70 30,85 50,85 C70,85 82,70 82,50 C82,30 65,18 48,22" />
     </svg>`;
 
+    const xMarkBtn = `<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <line x1="22" y1="22" x2="78" y2="78" stroke="#4A90E2" stroke-width="10" stroke-linecap="round"/>
+        <line x1="78" y1="22" x2="22" y2="78" stroke="#4A90E2" stroke-width="10" stroke-linecap="round"/>
+    </svg>`;
+    const oMarkBtn = `<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="31" stroke="#E25C4A" stroke-width="10" fill="none" stroke-linecap="round"/>
+    </svg>`;
+
     function drawMark(place, row, col){
+        errorText.textContent = '';
+        errorText.classList.remove('active');
         const mark = ticTacToe.play(row, col);
         if(mark === 'x'){
             place.innerHTML = xMark;
         } else if(mark === 'o'){
             place.innerHTML = oMark;
         } else {
+            errorText.classList.add('active');
             errorText.textContent = "Can't play there!";
         }
     }
@@ -346,6 +367,24 @@ const ticTacToe = (function(){
         matchLine.innerHTML = '';
         errorText.textContent = '';
         resultText.textContent = '';
+        errorText.classList.remove('active');
+        resultText.classList.remove('active');
+    }
+
+    function displayMarkToggle (btn){
+        const currentMark = btn.dataset.mark;
+        if(currentMark === 'x'){
+            btn.innerHTML = oMarkBtn;
+            btn.dataset.mark = 'o';
+        } else if(currentMark === 'o'){
+            btn.innerHTML = xMarkBtn;
+            btn.dataset.mark = 'x';
+        }
+    }
+
+    function updateScoreDisplay (){
+        playerAScore.textContent = ticTacToe.getPlayerAScore();
+        playerBScore.textContent = ticTacToe.getPlayerBScore();
     }
 
     //attach event listeners
@@ -360,13 +399,42 @@ const ticTacToe = (function(){
 
             if(ticTacToe.checkRoundEnd()){
                 const winningPattern = ticTacToe.winningPattern();
+                const winnerName = ticTacToe.winnerName();
+                resultText.classList.add('active');
                 if(!winningPattern){
-                    resultText.textContent = "No Winner";
+                    resultText.textContent = "Tie";
                 } else {
                     drawWinningLine(winningPattern)
-                    resultText.textContent = `Player ${ticTacToe.winnerName()} wins`
+                    resultText.textContent = `${winnerName} wins`
+                    updateScoreDisplay()
                 }
             }
         })
     })
+
+    playerAMark.addEventListener('click', () => {
+        if(ticTacToe.toggleMark()){
+            displayMarkToggle(playerAMark);
+            displayMarkToggle(playerBMark);
+        } else {
+            errorText.textContent = "Can't toggle mark mid game";
+        }
+    })
+
+    playerBMark.addEventListener('click', () => {
+        if(ticTacToe.toggleMark()){
+            displayMarkToggle(playerAMark);
+            displayMarkToggle(playerBMark);
+        } else {
+            errorText.textContent = "Can't toggle mark mid game";
+        }
+    })
+
+    playerAName.addEventListener('input', () => ticTacToe.setPlayerAName(playerAName.value));
+    playerBName.addEventListener('input', () => ticTacToe.setPlayerBName(playerBName.value));
+    newRoundBtn.addEventListener('click', () => {
+        ticTacToe.newRound();
+        clearBoardDisplay();
+    })
+
 })();
