@@ -417,7 +417,8 @@ const ticTacToe = (function(){
             displayMarkToggle(playerAMark);
             displayMarkToggle(playerBMark);
         } else {
-            errorText.textContent = "Can't toggle mark mid game";
+            errorText.classList.add('active');
+            errorText.textContent = "Can't toggle marks mid game";
         }
     })
 
@@ -426,7 +427,8 @@ const ticTacToe = (function(){
             displayMarkToggle(playerAMark);
             displayMarkToggle(playerBMark);
         } else {
-            errorText.textContent = "Can't toggle mark mid game";
+            errorText.classList.add('active');
+            errorText.textContent = "Can't toggle marks mid game";
         }
     })
 
